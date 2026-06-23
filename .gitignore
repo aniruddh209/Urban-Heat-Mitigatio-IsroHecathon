@@ -1,0 +1,90 @@
+# ========================
+# Dependencies
+# ========================
+node_modules/
+package-lock.json
+
+# ========================
+# Python (Flask backend)
+# ========================
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+*.egg-info/
+pip-log.txt
+
+# ========================
+# Build / Output
+# ========================
+dist/
+build/
+out/
+.next/
+
+# ========================
+# Environment Variables & Secrets
+# ========================
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ========================
+# Databases (local dev)
+# ========================
+*.db
+*.sqlite
+*.sqlite3
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+._*
+.Spotlight-V100
+.Trashes
+Desktop.ini
+
+# ========================
+# IDEs & Editors
+# ========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+
+# ========================
+# Misc
+# ========================
+.cache/
+.temp/
+.tmp/
+*.tgz
+*.tsbuildinfo
