@@ -1,0 +1,167 @@
+{
+  "project": "UrbanHeat AI \u2014 ISRO BAH 2026",
+  "training_timestamp": "2026-06-24T22:37:19.540582",
+  "total_training_time_sec": 125.5,
+  "dataset": {
+    "total_cities": 100,
+    "total_samples": 5000,
+    "train_samples": 4000,
+    "test_samples": 1000,
+    "features": [
+      "ndvi",
+      "ndbi",
+      "albedo",
+      "humidity",
+      "population_density",
+      "building_density",
+      "elevation_m",
+      "rainfall_mm",
+      "aqi",
+      "green_cover_pct",
+      "water_body_pct",
+      "wind_speed"
+    ],
+    "target": "lst",
+    "lst_stats": {
+      "min": 18.0,
+      "max": 44.79,
+      "mean": 29.84,
+      "std": 5.61
+    }
+  },
+  "model_comparison": {
+    "Linear Regression": {
+      "train_rmse": 2.9548,
+      "test_rmse": 2.9781,
+      "train_mae": 2.3836,
+      "test_mae": 2.3743,
+      "train_r2": 0.7235,
+      "test_r2": 0.7142,
+      "cv_r2_mean": 0.721,
+      "cv_r2_std": 0.0077,
+      "training_time_sec": 0.01
+    },
+    "Random Forest": {
+      "train_rmse": 1.5737,
+      "test_rmse": 2.7086,
+      "train_mae": 1.2091,
+      "test_mae": 2.1194,
+      "train_r2": 0.9216,
+      "test_r2": 0.7636,
+      "cv_r2_mean": 0.7744,
+      "cv_r2_std": 0.0124,
+      "training_time_sec": 0.66
+    },
+    "XGBoost": {
+      "train_rmse": 0.6194,
+      "test_rmse": 2.7719,
+      "train_mae": 0.46,
+      "test_mae": 2.1727,
+      "train_r2": 0.9879,
+      "test_r2": 0.7524,
+      "cv_r2_mean": 0.7583,
+      "cv_r2_std": 0.0136,
+      "training_time_sec": 0.82
+    },
+    "LightGBM": {
+      "train_rmse": 1.4659,
+      "test_rmse": 2.7764,
+      "train_mae": 1.1362,
+      "test_mae": 2.1896,
+      "train_r2": 0.932,
+      "test_r2": 0.7516,
+      "cv_r2_mean": 0.7623,
+      "cv_r2_std": 0.0105,
+      "training_time_sec": 0.32
+    },
+    "CatBoost": {
+      "train_rmse": 2.0738,
+      "test_rmse": 2.6772,
+      "train_mae": 1.6261,
+      "test_mae": 2.1174,
+      "train_r2": 0.8638,
+      "test_r2": 0.769,
+      "cv_r2_mean": 0.7803,
+      "cv_r2_std": 0.0129,
+      "training_time_sec": 0.61,
+      "test_r2_tuned": 0.7704,
+      "test_rmse_tuned": 2.6694,
+      "test_mae_tuned": 2.1082
+    },
+    "SVR": {
+      "train_rmse": 2.4435,
+      "test_rmse": 2.7343,
+      "train_mae": 1.8287,
+      "test_mae": 2.1417,
+      "train_r2": 0.8109,
+      "test_r2": 0.759,
+      "cv_r2_mean": 0.7709,
+      "cv_r2_std": 0.0143,
+      "training_time_sec": 0.4
+    }
+  },
+  "best_model": {
+    "name": "CatBoost",
+    "test_r2": 0.769,
+    "test_rmse": 2.6772,
+    "test_mae": 2.1174,
+    "cv_r2_mean": 0.7803,
+    "cv_r2_std": 0.0129
+  },
+  "shap_feature_importance": {
+    "elevation_m": {
+      "mean_abs_shap": 1.5634,
+      "importance_pct": 26.32
+    },
+    "ndbi": {
+      "mean_abs_shap": 0.9695,
+      "importance_pct": 16.32
+    },
+    "green_cover_pct": {
+      "mean_abs_shap": 0.7092,
+      "importance_pct": 11.94
+    },
+    "ndvi": {
+      "mean_abs_shap": 0.7058,
+      "importance_pct": 11.88
+    },
+    "building_density": {
+      "mean_abs_shap": 0.5164,
+      "importance_pct": 8.69
+    },
+    "albedo": {
+      "mean_abs_shap": 0.3844,
+      "importance_pct": 6.47
+    },
+    "rainfall_mm": {
+      "mean_abs_shap": 0.318,
+      "importance_pct": 5.35
+    },
+    "humidity": {
+      "mean_abs_shap": 0.1893,
+      "importance_pct": 3.19
+    },
+    "population_density": {
+      "mean_abs_shap": 0.1691,
+      "importance_pct": 2.85
+    },
+    "wind_speed": {
+      "mean_abs_shap": 0.1665,
+      "importance_pct": 2.8
+    },
+    "water_body_pct": {
+      "mean_abs_shap": 0.1449,
+      "importance_pct": 2.44
+    },
+    "aqi": {
+      "mean_abs_shap": 0.1042,
+      "importance_pct": 1.75
+    }
+  },
+  "artifacts": {
+    "model_file": "models/best_model.joblib",
+    "scaler_file": "models/scaler.joblib",
+    "feature_names_file": "models/feature_names.json",
+    "training_dataset": "data/training_dataset.csv"
+  }
+}

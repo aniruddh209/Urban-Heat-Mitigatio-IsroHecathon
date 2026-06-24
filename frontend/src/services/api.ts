@@ -102,4 +102,21 @@ export const adminAPI = {
   logs: () => api.get('/admin/logs'),
 };
 
+export const mlAPI = {
+  predict: (data: { ndvi: number; albedo: number; building_density: number; relative_humidity: number; baseline_temp?: number }) =>
+    api.post('/ml/predict', data),
+  simulate: (data: { current_lst: number; baseline_albedo: number; baseline_ndvi: number; interventions: Array<{ type: string; coverage_ratio: number }> }) =>
+    api.post('/ml/simulate', data),
+  hotspots: (data: { points: Array<{ lat: number; lng: number; temperature: number; humidity: number }>; threshold_temp?: number }) =>
+    api.post('/ml/hotspots', data),
+  explain: (data: { ndvi: number; albedo: number; building_density: number; relative_humidity: number; baseline_temp?: number }) =>
+    api.post('/ml/explain', data),
+  optimize: (data: { target_temp_reduction: number; max_budget: number; weight_green_cover?: number; weight_albedo?: number }) =>
+    api.post('/ml/optimize', data),
+  health: () => api.get('/ml/health'),
+  trainingReport: () => api.get('/ml/report/training-report'),
+  hotspotReport: () => api.get('/ml/report/hotspot-report'),
+  modelInfo: () => api.get('/ml/report/model-info'),
+};
+
 export default api;

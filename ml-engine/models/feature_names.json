@@ -1,0 +1,14 @@
+[
+  "ndvi",
+  "ndbi",
+  "albedo",
+  "humidity",
+  "population_density",
+  "building_density",
+  "elevation_m",
+  "rainfall_mm",
+  "aqi",
+  "green_cover_pct",
+  "water_body_pct",
+  "wind_speed"
+]
