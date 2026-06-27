@@ -1,10 +1,11 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 import numpy as np
 import os
 import json
+import sys
 
 router = APIRouter()
 
@@ -34,6 +35,20 @@ def _load_model():
                 _feature_names = json.load(f)
     except Exception as e:
         print(f"[ML] Could not load model for simulation: {e}")
+
+
+def _predict_with_features(feature_dict):
+    """
+    Run prediction using the feature engineering pipeline.
+    Returns the predicted LST value.
+    """
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+    from training.feature_engineer import engineer_single_input
+
+    engineered = engineer_single_input(feature_dict)
+    X = engineered.reshape(1, -1)
+    X_scaled = _scaler.transform(X)
+    return float(_model.predict(X_scaled)[0])
 
 
 # ─── Intervention Effects Database ─────────────────────────────
@@ -107,6 +122,7 @@ class SimulationRequest(BaseModel):
     current_lst: float = Field(..., description="Current LST in Celsius")
     baseline_albedo: float = Field(0.18, description="Current albedo")
     baseline_ndvi: float = Field(0.20, description="Current NDVI")
+    baseline_ndbi: float = Field(0.60, description="Current NDBI")
     baseline_humidity: float = Field(55.0, description="Current humidity")
     baseline_building_density: float = Field(0.65, description="Current building density")
     baseline_green_cover: float = Field(15.0, description="Current green cover %")
@@ -116,6 +132,8 @@ class SimulationRequest(BaseModel):
     rainfall_mm: float = Field(800.0, description="Annual rainfall")
     aqi: float = Field(100.0, description="AQI")
     wind_speed: float = Field(8.0, description="Wind speed")
+    month: Optional[int] = Field(None, description="Month (1-12)", ge=1, le=12)
+    hour_of_day: Optional[float] = Field(None, description="Hour (6-20)", ge=6.0, le=20.0)
     interventions: List[Intervention] = Field(..., description="List of interventions")
 
 
@@ -150,7 +168,7 @@ async def simulate_cooling(request: SimulationRequest):
 
         # Start with baseline features
         ndvi = request.baseline_ndvi
-        ndbi = 1.0 - ndvi  # Simplified inverse
+        ndbi = request.baseline_ndbi
         albedo = request.baseline_albedo
         building_density = request.baseline_building_density
         green_cover = request.baseline_green_cover
@@ -186,18 +204,18 @@ async def simulate_cooling(request: SimulationRequest):
             ))
 
         # Clamp values
-        ndvi = np.clip(ndvi, 0.01, 0.85)
-        ndbi = np.clip(1.0 - ndvi * 0.8, 0.1, 0.95)
-        albedo = np.clip(albedo, 0.05, 0.6)
-        building_density = np.clip(building_density, 0.05, 0.98)
-        green_cover = np.clip(green_cover, 1, 80)
-        water_body = np.clip(water_body, 0, 30)
+        ndvi = float(np.clip(ndvi, 0.01, 0.85))
+        ndbi = float(np.clip(1.0 - ndvi * 0.8, 0.1, 0.95))
+        albedo = float(np.clip(albedo, 0.05, 0.6))
+        building_density = float(np.clip(building_density, 0.05, 0.98))
+        green_cover = float(np.clip(green_cover, 1, 80))
+        water_body = float(np.clip(water_body, 0, 30))
 
         model_used = "Physics-Based"
 
         if _model is not None and _scaler is not None and _feature_names is not None:
-            # Use trained model to predict new LST
-            feature_values = {
+            # Use trained model with feature engineering pipeline
+            feature_dict = {
                 "ndvi": ndvi,
                 "ndbi": ndbi,
                 "albedo": albedo,
@@ -211,10 +229,13 @@ async def simulate_cooling(request: SimulationRequest):
                 "water_body_pct": water_body,
                 "wind_speed": request.wind_speed,
             }
-            X = np.array([[feature_values[f] for f in _feature_names]])
-            X_scaled = _scaler.transform(X)
-            new_lst = float(_model.predict(X_scaled)[0])
-            model_used = "Trained ML Model"
+            if request.month is not None:
+                feature_dict["month"] = request.month
+            if request.hour_of_day is not None:
+                feature_dict["hour_of_day"] = request.hour_of_day
+
+            new_lst = _predict_with_features(feature_dict)
+            model_used = "Trained ML Model (v2)"
         else:
             # Physics-based fallback
             temp_drop = 0.0
@@ -223,7 +244,6 @@ async def simulate_cooling(request: SimulationRequest):
                 if not effects:
                     continue
                 cov = intervention.coverage_ratio
-                # Approximate cooling from feature changes
                 temp_drop += effects["ndvi_delta"] * cov * 6.5
                 temp_drop += effects["albedo_delta"] * cov * 5.0
                 temp_drop += effects["green_cover_delta"] * cov * 0.08

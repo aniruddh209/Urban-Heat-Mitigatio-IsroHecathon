@@ -1,6 +1,7 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from typing import Optional
 import numpy as np
 import os
 import json
@@ -37,12 +38,47 @@ def _load_model():
         if os.path.exists(features_path):
             with open(features_path, "r") as f:
                 _feature_names = json.load(f)
+            print(f"[ML] Loaded {len(_feature_names)} feature names")
         if os.path.exists(report_path):
             with open(report_path, "r") as f:
                 _training_report = json.load(f)
     except Exception as e:
         print(f"[ML] Warning: Could not load trained model: {e}")
         print("[ML] Falling back to physics-based prediction")
+
+
+def _build_feature_vector(request) -> np.ndarray:
+    """
+    Build a feature vector using the same feature engineering pipeline
+    as training. This ensures inference uses identical transformations.
+    """
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+    from training.feature_engineer import engineer_single_input, ENGINEERED_FEATURE_COLS
+
+    raw_features = {
+        "ndvi": request.ndvi,
+        "ndbi": request.ndbi,
+        "albedo": request.albedo,
+        "humidity": request.relative_humidity,
+        "population_density": request.population_density,
+        "building_density": request.building_density,
+        "elevation_m": request.elevation_m,
+        "rainfall_mm": request.rainfall_mm,
+        "aqi": request.aqi,
+        "green_cover_pct": request.green_cover_pct,
+        "water_body_pct": request.water_body_pct,
+        "wind_speed": request.wind_speed,
+    }
+
+    # Add temporal features
+    if hasattr(request, 'month') and request.month is not None:
+        raw_features["month"] = request.month
+    if hasattr(request, 'hour_of_day') and request.hour_of_day is not None:
+        raw_features["hour_of_day"] = request.hour_of_day
+
+    engineered = engineer_single_input(raw_features)
+    return engineered.reshape(1, -1)
 
 
 # ─── Request / Response Models ─────────────────────────────────
@@ -60,6 +96,9 @@ class PredictionRequest(BaseModel):
     water_body_pct: float = Field(3.0, description="Water body percentage")
     wind_speed: float = Field(8.0, description="Wind speed in km/h")
     baseline_temp: float = Field(28.0, description="Ambient air temperature in Celsius")
+    # New optional temporal fields
+    month: Optional[int] = Field(None, description="Month of year (1-12). Defaults to May (5) if not provided.", ge=1, le=12)
+    hour_of_day: Optional[float] = Field(None, description="Hour of day (6-20). Defaults to 13 if not provided.", ge=6.0, le=20.0)
 
 
 class PredictionResponse(BaseModel):
@@ -69,6 +108,8 @@ class PredictionResponse(BaseModel):
     model_used: str = Field(..., description="Name of the ML model used")
     model_r2: float = Field(..., description="Model R² score on test set")
     confidence: float = Field(..., description="Prediction confidence percentage")
+    prediction_interval_low: Optional[float] = Field(None, description="Lower bound of prediction interval (°C)")
+    prediction_interval_high: Optional[float] = Field(None, description="Upper bound of prediction interval (°C)")
 
 
 def _physics_fallback(request: PredictionRequest) -> float:
@@ -84,6 +125,19 @@ def _physics_fallback(request: PredictionRequest) -> float:
     return request.baseline_temp + lst_effect
 
 
+def _compute_confidence(X_scaled, model_r2):
+    """
+    Compute prediction confidence based on how close input is to training
+    distribution (approximated via feature magnitude) and model R².
+    """
+    # Mahalanobis-like: if input is far from mean (0 after scaling), lower confidence
+    feature_dist = np.sqrt(np.mean(X_scaled ** 2))
+    # Typical range is 0-3 for standardized features; beyond 3 is outlier territory
+    dist_penalty = max(0, min(15, (feature_dist - 1.5) * 5))
+    confidence = min(98.0, max(60.0, model_r2 * 100 - dist_penalty))
+    return round(confidence, 1)
+
+
 @router.post("/", response_model=PredictionResponse)
 async def predict_lst(request: PredictionRequest):
     try:
@@ -92,26 +146,13 @@ async def predict_lst(request: PredictionRequest):
         model_name = "Physics-Based Estimation"
         model_r2 = 0.0
         confidence = 70.0
+        pred_low = None
+        pred_high = None
 
         if _model is not None and _scaler is not None and _feature_names is not None:
-            # Build feature vector in the correct order
-            feature_values = {
-                "ndvi": request.ndvi,
-                "ndbi": request.ndbi,
-                "albedo": request.albedo,
-                "humidity": request.relative_humidity,
-                "population_density": request.population_density,
-                "building_density": request.building_density,
-                "elevation_m": request.elevation_m,
-                "rainfall_mm": request.rainfall_mm,
-                "aqi": request.aqi,
-                "green_cover_pct": request.green_cover_pct,
-                "water_body_pct": request.water_body_pct,
-                "wind_speed": request.wind_speed,
-            }
-
-            X = np.array([[feature_values[f] for f in _feature_names]])
-            X_scaled = _scaler.transform(X)
+            # Build engineered feature vector
+            X_raw = _build_feature_vector(request)
+            X_scaled = _scaler.transform(X_raw)
             predicted_lst = float(_model.predict(X_scaled)[0])
 
             # Get model info from training report
@@ -119,11 +160,19 @@ async def predict_lst(request: PredictionRequest):
                 best = _training_report.get("best_model", {})
                 model_name = best.get("name", "Trained ML Model")
                 model_r2 = best.get("test_r2", 0.90)
-                confidence = min(98.0, max(75.0, model_r2 * 100))
             else:
                 model_name = "Trained ML Model"
                 model_r2 = 0.90
-                confidence = 90.0
+
+            # Compute confidence based on input distance from training distribution
+            confidence = _compute_confidence(X_scaled, model_r2)
+
+            # Prediction interval (approximation based on test RMSE)
+            test_rmse = 1.0  # Default conservative estimate
+            if _training_report:
+                test_rmse = _training_report.get("best_model", {}).get("test_rmse", 1.0)
+            pred_low = round(predicted_lst - 1.96 * test_rmse, 2)
+            pred_high = round(predicted_lst + 1.96 * test_rmse, 2)
         else:
             # Fallback to physics model
             predicted_lst = _physics_fallback(request)
@@ -146,6 +195,8 @@ async def predict_lst(request: PredictionRequest):
             model_used=model_name,
             model_r2=round(model_r2, 4),
             confidence=round(confidence, 1),
+            prediction_interval_low=pred_low,
+            prediction_interval_high=pred_high,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")

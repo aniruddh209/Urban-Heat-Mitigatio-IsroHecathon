@@ -1,10 +1,11 @@
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import numpy as np
 import os
 import json
+import sys
 
 router = APIRouter()
 
@@ -41,6 +42,13 @@ def _load_model():
         print(f"[ML] Could not load model for explainability: {e}")
 
 
+def _build_engineered_features(feature_values):
+    """Build engineered feature vector using training pipeline."""
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+    from training.feature_engineer import engineer_single_input
+    return engineer_single_input(feature_values).reshape(1, -1)
+
+
 # ─── Request / Response ────────────────────────────────────────
 class ExplanationRequest(BaseModel):
     ndvi: float = Field(..., description="NDVI value (0 to 1)")
@@ -56,6 +64,8 @@ class ExplanationRequest(BaseModel):
     water_body_pct: float = Field(3.0, description="Water body %")
     wind_speed: float = Field(8.0, description="Wind speed km/h")
     baseline_temp: float = Field(28.0, description="Baseline ambient temperature")
+    month: Optional[int] = Field(None, description="Month (1-12)", ge=1, le=12)
+    hour_of_day: Optional[float] = Field(None, description="Hour (6-20)", ge=6.0, le=20.0)
 
 
 class ShapValue(BaseModel):
@@ -140,6 +150,107 @@ FEATURE_INFO = {
         "heating_desc": "Low wind speed reduces convective heat removal from surfaces.",
         "cooling_desc": "Wind facilitates convective cooling and heat dispersal.",
     },
+    "month": {
+        "display": "Month of Year",
+        "heating_desc": "Summer months (Apr-Jun) bring peak solar radiation and higher temperatures.",
+        "cooling_desc": "Winter months and monsoon season moderate surface temperatures.",
+    },
+    "hour_of_day": {
+        "display": "Time of Day",
+        "heating_desc": "Peak afternoon hours (12-16) have maximum solar heating.",
+        "cooling_desc": "Early morning and evening hours have lower solar radiation.",
+    },
+    # Engineered features
+    "ndvi_x_ndbi": {
+        "display": "Vegetation × Built-up Interaction",
+        "heating_desc": "High built-up with some vegetation creates mixed heat zones.",
+        "cooling_desc": "Low interaction indicates either open or fully vegetated areas.",
+    },
+    "building_density_x_albedo": {
+        "display": "Building × Albedo Interaction",
+        "heating_desc": "Dense dark buildings trap maximum heat.",
+        "cooling_desc": "High albedo buildings reflect solar radiation effectively.",
+    },
+    "elevation_x_humidity": {
+        "display": "Elevation × Humidity Interaction",
+        "heating_desc": "Low elevation with dry conditions amplifies heating.",
+        "cooling_desc": "Higher elevation with moisture provides enhanced cooling.",
+    },
+    "green_cover_x_wind": {
+        "display": "Ventilation Corridor Effect",
+        "heating_desc": "Poor green cover with low wind creates stagnant heat zones.",
+        "cooling_desc": "Green corridors with wind facilitate effective heat dispersal.",
+    },
+    "ndbi_sq_minus_ndvi_sq": {
+        "display": "Heat Contrast Index",
+        "heating_desc": "Built-up dominance over vegetation intensifies urban heating.",
+        "cooling_desc": "Vegetation dominance reduces urban heat island effect.",
+    },
+    "ndvi_x_green_cover": {
+        "display": "Combined Vegetation Effect",
+        "heating_desc": "Low vegetation quality and quantity compound heating.",
+        "cooling_desc": "High quality vegetation with extensive cover provides maximum cooling.",
+    },
+    "pop_density_x_building": {
+        "display": "Urban Intensity Index",
+        "heating_desc": "Dense population in dense buildings generates maximum anthropogenic heat.",
+        "cooling_desc": "Lower urban intensity reduces heat generation.",
+    },
+    "aqi_x_humidity": {
+        "display": "Pollution × Humidity",
+        "heating_desc": "Pollution in humid conditions creates a strong greenhouse effect.",
+        "cooling_desc": "Clean air with appropriate moisture supports natural cooling.",
+    },
+    "ndvi_ratio": {
+        "display": "Vegetation Dominance Ratio",
+        "heating_desc": "Low vegetation ratio means built-up surfaces dominate.",
+        "cooling_desc": "High vegetation ratio indicates natural landscape dominance.",
+    },
+    "green_to_built_ratio": {
+        "display": "Green-to-Built Ratio",
+        "heating_desc": "Low ratio indicates insufficient green space relative to development.",
+        "cooling_desc": "High ratio indicates balanced development with adequate green space.",
+    },
+    "water_to_built_ratio": {
+        "display": "Water-to-Built Ratio",
+        "heating_desc": "Low water body presence relative to built area reduces cooling.",
+        "cooling_desc": "Adequate water bodies relative to development provide cooling.",
+    },
+    "log_pop_density": {
+        "display": "Population Scale (Log)",
+        "heating_desc": "Large population centers generate significant anthropogenic heat.",
+        "cooling_desc": "Smaller populations generate less anthropogenic heat.",
+    },
+    "log_aqi": {
+        "display": "Pollution Level (Log)",
+        "heating_desc": "High pollution traps outgoing heat radiation.",
+        "cooling_desc": "Low pollution allows efficient heat dissipation.",
+    },
+    "log_rainfall": {
+        "display": "Rainfall Scale (Log)",
+        "heating_desc": "Low rainfall leads to dry soil and reduced evaporative cooling.",
+        "cooling_desc": "Adequate rainfall maintains soil moisture for evapotranspiration.",
+    },
+    "month_sin": {
+        "display": "Seasonal Cycle (sine)",
+        "heating_desc": "Pre-monsoon season (Apr-Jun) brings peak heat.",
+        "cooling_desc": "Post-monsoon and winter bring cooler temperatures.",
+    },
+    "month_cos": {
+        "display": "Seasonal Cycle (cosine)",
+        "heating_desc": "Certain seasonal phases intensify heating patterns.",
+        "cooling_desc": "Certain seasonal phases promote cooling.",
+    },
+    "urban_heat_index": {
+        "display": "Urban Heat Index",
+        "heating_desc": "High built-up density with low vegetation creates intense urban heat.",
+        "cooling_desc": "Balanced vegetation offsets built-up area heating.",
+    },
+    "thermal_comfort_index": {
+        "display": "Thermal Comfort Index",
+        "heating_desc": "High humidity with dark surfaces and low wind creates discomfort.",
+        "cooling_desc": "Good ventilation with reflective surfaces improves thermal comfort.",
+    },
 }
 
 
@@ -148,7 +259,7 @@ async def explain_prediction(request: ExplanationRequest):
     try:
         _load_model()
 
-        # Build feature vector
+        # Build raw feature dict
         feature_values = {
             "ndvi": request.ndvi,
             "ndbi": request.ndbi,
@@ -163,17 +274,21 @@ async def explain_prediction(request: ExplanationRequest):
             "water_body_pct": request.water_body_pct,
             "wind_speed": request.wind_speed,
         }
+        if request.month is not None:
+            feature_values["month"] = request.month
+        if request.hour_of_day is not None:
+            feature_values["hour_of_day"] = request.hour_of_day
 
         model_name = "Physics-Based"
         explanation_method = "Analytical Decomposition"
 
         if _model is not None and _scaler is not None and _feature_names is not None:
-            # Use real SHAP explainer
             try:
                 import shap
 
-                X = np.array([[feature_values[f] for f in _feature_names]])
-                X_scaled = _scaler.transform(X)
+                # Use feature engineering pipeline
+                X_raw = _build_engineered_features(feature_values)
+                X_scaled = _scaler.transform(X_raw)
                 predicted_lst = float(_model.predict(X_scaled)[0])
 
                 # Try TreeExplainer first, fall back to KernelExplainer
@@ -182,11 +297,18 @@ async def explain_prediction(request: ExplanationRequest):
                     shap_vals = explainer.shap_values(X_scaled)[0]
                     base_val = float(explainer.expected_value)
                 except Exception:
-                    # Kernel explainer for non-tree models
-                    background = np.zeros((1, len(_feature_names)))
-                    explainer = shap.KernelExplainer(_model.predict, background)
-                    shap_vals = explainer.shap_values(X_scaled)[0]
-                    base_val = float(explainer.expected_value)
+                    # For stacking or non-tree models, use KernelExplainer
+                    try:
+                        # Try to get the first base estimator (XGBoost from stacking)
+                        base = _model.estimators_[0]
+                        explainer = shap.TreeExplainer(base)
+                        shap_vals = explainer.shap_values(X_scaled)[0]
+                        base_val = float(explainer.expected_value)
+                    except Exception:
+                        background = np.zeros((1, len(_feature_names)))
+                        explainer = shap.KernelExplainer(_model.predict, background)
+                        shap_vals = explainer.shap_values(X_scaled)[0]
+                        base_val = float(explainer.expected_value)
 
                 model_name = _training_report.get("best_model", {}).get("name", "ML Model") if _training_report else "ML Model"
                 explanation_method = "SHAP (TreeExplainer)"
@@ -200,26 +322,38 @@ async def explain_prediction(request: ExplanationRequest):
         uhi_intensity = predicted_lst - request.baseline_temp
 
         # Build SHAP value response
-        total_abs = sum(abs(v) for v in shap_vals) or 1.0
         features_to_use = _feature_names if _feature_names else list(feature_values.keys())
+        total_abs = sum(abs(float(v)) for v in shap_vals) or 1.0
 
         shap_list = []
         top_heating = ("unknown", 0)
         top_cooling = ("unknown", 0)
 
         for i, feat in enumerate(features_to_use):
+            if i >= len(shap_vals):
+                break
             sv = float(shap_vals[i])
             direction = "heating" if sv > 0 else "cooling"
-            info = FEATURE_INFO.get(feat, {"display": feat, "heating_desc": "Contributes to heating.", "cooling_desc": "Contributes to cooling."})
+            info = FEATURE_INFO.get(feat, {
+                "display": feat.replace("_", " ").title(),
+                "heating_desc": "Contributes to heating.",
+                "cooling_desc": "Contributes to cooling."
+            })
 
             if sv > top_heating[1]:
                 top_heating = (info["display"], sv)
             if sv < top_cooling[1]:
                 top_cooling = (info["display"], sv)
 
+            # Get the feature value (from engineered features if available)
+            if feat in feature_values:
+                fval = feature_values[feat]
+            else:
+                fval = 0.0  # Engineered features don't have raw values
+
             shap_list.append(ShapValue(
                 feature=info["display"],
-                feature_value=round(feature_values[feat], 4),
+                feature_value=round(float(fval), 4),
                 shap_value=round(sv, 4),
                 importance_pct=round(abs(sv) / total_abs * 100, 1),
                 direction=direction,

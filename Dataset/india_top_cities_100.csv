@@ -1,0 +1,101 @@
+city,city_ascii,lat,lng,country,iso2,iso3,admin_name,capital,population,id
+Mumbai,Mumbai,19.0758,72.8775,India,IN,IND,Mahārāshtra,admin,24973000.0,1356226629
+Kolkāta,Kolkata,22.5675,88.37,India,IN,IND,West Bengal,admin,21747000.0,1356060520
+Delhi,Delhi,28.66,77.23,India,IN,IND,Delhi,admin,16349831.0,1356872604
+Chennai,Chennai,13.0825,80.275,India,IN,IND,Tamil Nādu,admin,12395000.0,1356374944
+Bangalore,Bangalore,12.9791,77.5913,India,IN,IND,Karnātaka,admin,10456000.0,1356410365
+Ahmedabad,Ahmedabad,23.0219,72.5797,India,IN,IND,Gujarāt,minor,9272670.0,1356304381
+Pune,Pune,18.5211,73.8553,India,IN,IND,Mahārāshtra,,8231000.0,1356081074
+Hyderābād,Hyderabad,17.3617,78.4747,India,IN,IND,Telangāna,admin,7677018.0,1356871768
+Sūrat,Surat,21.205,72.84,India,IN,IND,Gujarāt,,6538000.0,1356758738
+Prayagraj,Prayagraj,25.45,81.85,India,IN,IND,Uttar Pradesh,,5954391.0,1356718332
+Kanpur,Kanpur,24.285,72.6933,India,IN,IND,Gujarāt,,5230000.0,1356728485
+Kanpur,Kanpur,26.4725,80.3311,India,IN,IND,Uttar Pradesh,,4581268.0,1356575238
+Belāhi,Belahi,25.7167,86.4,India,IN,IND,Bihār,,4487379.0,1356614886
+Vadodara,Vadodara,22.3,73.2,India,IN,IND,Gujarāt,,3500000.0,1356705249
+Nādampālaiyam,Nadampalaiyam,11.1793,77.376,India,IN,IND,Tamil Nādu,,3458045.0,1356163850
+Lucknow,Lucknow,26.847,80.947,India,IN,IND,Uttar Pradesh,admin,3382000.0,1356891790
+Kannankulam,Kannankulam,10.4799,76.1131,India,IN,IND,Kerala,,3243170.0,1356335606
+Mahuākherāganj,Mahuakheraganj,29.13,78.95,India,IN,IND,Uttarākhand,,3198982.0,1356504467
+Nagla,Nagla,29.01,79.51,India,IN,IND,Uttarākhand,,3198982.0,1356327557
+Jaipur,Jaipur,26.915,75.82,India,IN,IND,Rājasthān,admin,3073350.0,1356293537
+Kottārasshēri,Kottarassheri,10.6167,76.5333,India,IN,IND,Kerala,,2952254.0,1356333889
+Attadappa,Attadappa,11.85,75.4167,India,IN,IND,Kerala,,2615266.0,1356069832
+Barmhān Kalān,Barmhan Kalan,23.0333,79.0167,India,IN,IND,Madhya Pradesh,,2537000.0,1356157519
+Gorakhpur,Gorakhpur,22.1688,81.6042,India,IN,IND,Chhattīsgarh,,2500000.0,1356424976
+Nāgpur,Nagpur,21.1497,79.0806,India,IN,IND,Mahārāshtra,,2405665.0,1356365743
+Guwāhāti,Guwahati,26.1806,91.7502,India,IN,IND,Assam,,2376654.0,1356593800
+Ghāziābād,Ghaziabad,28.6667,77.4167,India,IN,IND,Uttar Pradesh,,2375820.0,1356691871
+Coimbatore,Coimbatore,11.0008,76.9633,India,IN,IND,Tamil Nādu,,2136916.0,1356999503
+Patna,Patna,25.61,85.1414,India,IN,IND,Bihār,admin,2046652.0,1356821429
+Rājkot,Rajkot,22.2969,70.7984,India,IN,IND,Gujarāt,,2043000.0,1356317190
+Vishākhapatnam,Vishakhapatnam,17.6939,83.2922,India,IN,IND,Andhra Pradesh,,2035922.0,1356692563
+Indore,Indore,22.7186,75.855,India,IN,IND,Madhya Pradesh,,1994397.0,1356402812
+Abhepur,Abhepur,30.6667,76.8333,India,IN,IND,Punjab,,1895686.0,1356324522
+Gumānwāla,Gumanwala,29.9333,77.9,India,IN,IND,Uttarākhand,,1890422.0,1356018636
+Thāne,Thane,19.18,72.9633,India,IN,IND,Mahārāshtra,,1886941.0,1356681152
+Bhopāl,Bhopal,23.25,77.4167,India,IN,IND,Madhya Pradesh,admin,1798218.0,1356734039
+Āgra,Agra,27.18,78.02,India,IN,IND,Uttar Pradesh,,1760285.0,1356187395
+Peyanvilai,Peyanvilai,8.5674,78.1046,India,IN,IND,Tamil Nādu,,1750176.0,1356214129
+Pimpri-Chinchwad,Pimpri-Chinchwad,18.6278,73.8131,India,IN,IND,Mahārāshtra,,1729320.0,1356475483
+Harbatpur,Harbatpur,30.45,77.73,India,IN,IND,Uttarākhand,,1696694.0,1356707000
+Saundhonwāli,Saundhonwali,30.3331,77.9608,India,IN,IND,Uttarākhand,,1696694.0,1356173755
+Ludhiāna,Ludhiana,30.9083,75.8486,India,IN,IND,Punjab,,1618879.0,1356929498
+Meerut,Meerut,28.98,77.7064,India,IN,IND,Uttar Pradesh,,1571434.0,1356390476
+Madurai,Madurai,9.9197,78.1194,India,IN,IND,Tamil Nādu,minor,1561129.0,1356257289
+Nāsik,Nasik,20.0,73.7833,India,IN,IND,Mahārāshtra,,1486053.0,1356562598
+Farīdābād,Faridabad,28.4167,77.3,India,IN,IND,Haryāna,,1404653.0,1356013205
+Madārpur,Madarpur,26.227,84.6746,India,IN,IND,Bihār,,1367765.0,1356503810
+Najafgarh,Najafgarh,28.6125,76.9847,India,IN,IND,Delhi,,1365152.0,1356180206
+Jabalpur,Jabalpur,23.1667,79.9333,India,IN,IND,Madhya Pradesh,,1267564.0,1356115460
+Madanpur,Madanpur,29.326,79.1537,India,IN,IND,Uttarākhand,,1260078.0,1356959799
+Kamalwaganja Gaur,Kamalwaganja Gaur,29.2117,79.4654,India,IN,IND,Uttarākhand,,1260078.0,1356364559
+Kalyān,Kalyan,19.25,73.15,India,IN,IND,Mahārāshtra,,1246381.0,1356172246
+Āsansol,Asansol,23.6833,86.9667,India,IN,IND,West Bengal,,1243414.0,1356093694
+Vijayavāda,Vijayawada ,16.5167,80.6167,India,IN,IND,Andhra Pradesh,,1230000.0,1356807575
+Vasai-Virar,Vasai-Virar,19.47,72.8,India,IN,IND,Mahārāshtra,,1221233.0,1356707797
+Vārānasi,Varanasi,25.3189,83.0128,India,IN,IND,Uttar Pradesh,,1198491.0,1356145782
+Kalleli,Kalleli,9.2,76.8833,India,IN,IND,Kerala,,1197412.0,1356160389
+Srīnagar,Srinagar,34.0911,74.8061,India,IN,IND,Jammu and Kashmīr,admin,1180570.0,1356442950
+Aurangābād,Aurangabad,19.88,75.32,India,IN,IND,Mahārāshtra,,1175116.0,1356840670
+Dhanbād,Dhanbad,23.7928,86.435,India,IN,IND,Jhārkhand,,1162472.0,1356103392
+Amritsar,Amritsar,31.6269,74.877,India,IN,IND,Punjab,,1159227.0,1356926507
+Hāora,Haora,22.58,88.3294,India,IN,IND,West Bengal,,1077075.0,1356986516
+Rānchi,Ranchi,23.3556,85.3347,India,IN,IND,Jhārkhand,admin,1073440.0,1356110588
+Gwalior,Gwalior,26.2125,78.1775,India,IN,IND,Madhya Pradesh,,1069276.0,1356363967
+Jodhpur,Jodhpur,26.2944,73.0278,India,IN,IND,Rājasthān,,1033918.0,1356727084
+Chandīgarh,Chandigarh,30.7364,76.7883,India,IN,IND,Chandīgarh,admin,1026459.0,1356739179
+Raipur,Raipur,21.2379,81.6337,India,IN,IND,Chhattīsgarh,admin,1010087.0,1356374983
+Warangal,Warangal,17.9756,79.6011,India,IN,IND,Telangāna,,1005938.0,1356851618
+Kota,Kota,25.18,75.83,India,IN,IND,Rājasthān,,1001694.0,1356820310
+Bareilly,Bareilly,28.364,79.415,India,IN,IND,Uttar Pradesh,,1000000.0,1356698199
+Solāpur,Solapur,17.6703,75.9011,India,IN,IND,Mahārāshtra,,951558.0,1356314385
+Hubli,Hubli,15.3108,75.0925,India,IN,IND,Karnātaka,,943788.0,1356422270
+Mysore,Mysore,12.3086,76.6531,India,IN,IND,Karnātaka,,920550.0,1356779323
+Trichinopoly,Trichinopoly,10.8269,78.6928,India,IN,IND,Tamil Nādu,,916857.0,1356884472
+Morādābād,Moradabad,28.8389,78.7769,India,IN,IND,Uttar Pradesh,,887871.0,1356269375
+Tiruppūr,Tiruppur,11.1075,77.3398,India,IN,IND,Tamil Nādu,,877778.0,1356539761
+Jāmnagar,Jamnagar,22.47,70.07,India,IN,IND,Gujarāt,,877000.0,1356104995
+Gurgaon,Gurgaon,28.4667,77.0333,India,IN,IND,Haryāna,,876824.0,1356836043
+Alīgarh,Aligarh,27.88,78.08,India,IN,IND,Uttar Pradesh,,874408.0,1356076391
+Jalandhar,Jalandhar,31.3256,75.5792,India,IN,IND,Punjab,,873725.0,1356494816
+Bhubaneshwar,Bhubaneshwar,20.295,85.825,India,IN,IND,Odisha,admin,837737.0,1356140143
+Bhayandar,Bhayandar,19.3,72.85,India,IN,IND,Mahārāshtra,,814655.0,1356019118
+Narela,Narela,28.85,77.1,India,IN,IND,Delhi,,809913.0,1356542019
+Shīshgarh,Shishgarh,28.72,79.32,India,IN,IND,Uttar Pradesh,,753815.0,1356494610
+Thiruvananthapuram,Thiruvananthapuram,8.4875,76.9525,India,IN,IND,Kerala,admin,743691.0,1356024354
+Dispur,Dispur,26.15,91.77,India,IN,IND,Assam,admin,734577.0,1356960169
+Durgāpur,Durgapur,23.55,87.32,India,IN,IND,West Bengal,,726000.0,1356045686
+Bhiwandi,Bhiwandi,19.3,73.0667,India,IN,IND,Mahārāshtra,,709665.0,1356763571
+Sahāranpur,Saharanpur,29.964,77.546,India,IN,IND,Uttar Pradesh,,705478.0,1356139858
+Shiliguri,Shiliguri,26.72,88.42,India,IN,IND,West Bengal,,701489.0,1356724691
+Āvadi,Avadi,13.1147,80.1098,India,IN,IND,Tamil Nādu,,695000.0,1356009111
+Salem,Salem,11.65,78.1667,India,IN,IND,Tamil Nādu,,693236.0,1356567087
+Jui,Jui,29.67,78.9098,India,IN,IND,Uttarākhand,,687271.0,1356963462
+Amāldu,Amaldu,29.9333,78.5333,India,IN,IND,Uttarākhand,,687271.0,1356704923
+Kimsar,Kimsar,34.5,74.5333,India,IN,IND,Jammu and Kashmīr,,687271.0,1356083629
+Sindūri,Sinduri,30.7167,77.15,India,IN,IND,Himāchal Pradesh,,687271.0,1356353206
+Kochi,Kochi,9.9667,76.2833,India,IN,IND,Kerala,,677381.0,1356707865
+Gorakhpur,Gorakhpur,26.7611,83.3667,India,IN,IND,Uttar Pradesh,,673446.0,1356190221
+Guntūr,Guntur,16.3,80.45,India,IN,IND,Andhra Pradesh,,670073.0,1356374905
+Karaikandi,Karaikandi,24.8309,92.6143,India,IN,IND,Assam,,659260.0,1356669973
